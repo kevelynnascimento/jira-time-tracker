@@ -72,9 +72,11 @@ export default function Home() {
           headers: {
            "Authorization": `${token}`,
            "Content-Type": "application/json",
-           "Accept": "application/json",
+           "Accept": "application/json", 
+           "Origin": window.location.origin,
+           "Referer": window.location.origin,
            "Host": "app.tempo.io",
-           "Postman-Token": "your-postman-token", 
+           "Postman-Token": "your-postman-token", // Replace with actual Postman token if needed
            "Content-Length": JSON.stringify(body).length.toString(),
           },
           body: JSON.stringify(body),
