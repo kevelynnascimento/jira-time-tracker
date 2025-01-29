@@ -1,12 +1,36 @@
 "use client";
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 
 export default function Home() {
   const [token, setToken] = useState("");
+  const [workerId, setWorkerId] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
-  const workerId = "712020:5613a85b-64f0-4941-b04c-325b6fa20963";
+  useEffect(() => {
+    const savedToken = localStorage.getItem("tempoToken");
+    const savedWorkerId = localStorage.getItem("workerId");
+    if (savedToken) {
+      setToken(savedToken);
+    }
+    if (savedWorkerId) {
+      setWorkerId(savedWorkerId);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (token) {
+      localStorage.setItem("tempoToken", token);
+    }
+  }, [token]);
+
+  useEffect(() => {
+    if (workerId) {
+      localStorage.setItem("workerId", workerId);
+    }
+  }, [workerId]);
+
   const originTaskId = "2401307";
   const timeZone = "America/Sao_Paulo";
 
@@ -24,7 +48,7 @@ export default function Home() {
   };
 
   const registerHours = async () => {
-    if (!token || !startDate || !endDate) {
+    if (!token || !workerId || !startDate || !endDate) {
       alert("Preencha todos os campos.");
       return;
     }
@@ -46,8 +70,12 @@ export default function Home() {
         const response = await fetch("https://app.tempo.io/rest/tempo-timesheets/4/worklogs", {
           method: "POST",
           headers: {
-            "Authorization": `Bearer ${token}`,
-            "Content-Type": "application/json",
+           "Authorization": `${token}`,
+           "Content-Type": "application/json",
+           "Accept": "application/json",
+           "Host": "app.tempo.io",
+           "Postman-Token": "your-postman-token", 
+           "Content-Length": JSON.stringify(body).length.toString(),
           },
           body: JSON.stringify(body),
         });
@@ -62,31 +90,50 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white shadow-lg rounded-lg p-8 max-w-md w-full">
+      <div className="bg-white shadow-lg rounded-lg p-8 max-w-md w-full text-black">
         <h1 className="text-2xl font-bold text-center mb-6">Registrar Horas - Jira</h1>
 
-        <input
-          type="text"
-          placeholder="Token"
-          value={token}
-          onChange={(e) => setToken(e.target.value)}
-          className="w-full p-2 border rounded-md mb-4"
-        />
+        <label className="block mb-2">
+          Token Tempo-Bearer:
+          <input
+            type="text"
+            placeholder="Tempo-Bearer {token}"
+            value={token}
+            onChange={(e) => setToken(e.target.value)}
+            className="w-full p-2 border rounded-md mb-4 text-black"
+          />
+        </label>
 
-        <div className="flex gap-4 mb-4">
+        <label className="block mb-2">
+          Worker ID:
+          <input
+            type="text"
+            placeholder="Worker ID"
+            value={workerId}
+            onChange={(e) => setWorkerId(e.target.value)}
+            className="w-full p-2 border rounded-md mb-4 text-black"
+          />
+        </label>
+
+        <label className="block mb-2">
+          Data inicial:
           <input
             type="date"
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
-            className="w-full p-2 border rounded-md"
+            className="w-full p-2 border rounded-md mb-4 text-black"
           />
+        </label>
+
+        <label className="block mb-4">
+          Data final:
           <input
             type="date"
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
-            className="w-full p-2 border rounded-md"
+            className="w-full p-2 border rounded-md text-black"
           />
-        </div>
+        </label>
 
         <button
           onClick={registerHours}
